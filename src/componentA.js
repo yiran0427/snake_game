@@ -12,7 +12,11 @@ class ComponentA extends React.Component{
 
     clickHandler(){
         let newState = Object.assign({},this.state)
-        newState.display = 'Goodbye World!'
+        if(newState.toggle){
+            newState.display = 'Goodbye World!'
+        } else {
+            newState.display = 'Hello World!'
+        }
         newState.toggle = !newState.toggle
         this.setState(newState)
     }

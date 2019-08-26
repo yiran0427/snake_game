@@ -25,7 +25,7 @@ class Snake extends React.Component{
             case 's':
               snake.head.y += 1;
               break;
-                case 'a':
+            case 'a':
               snake.head.x -= 1;
               break;
             case 'd':
@@ -65,17 +65,18 @@ class Snake extends React.Component{
        return(
            <div id="Snake">
            <KeyboardEventHandler
-                  handleKeys={['w', 's', 'a', 'd']}
+                  handleKeys={['w', 's', 'a', 'd', 'left', 'up', 'right', 'down']}
                   onKeyEvent={(key, e) => {
-                  if (key === 'w' && (this.props.snake.direction === 'w' || this.props.snake.direction === 's')) {
+                  if ((key === 'w' || key === 'up') && (this.props.snake.direction === 'w' || this.props.snake.direction === 's')) {
                     return
-                  } else if (key === 's' && (this.props.snake.direction === 's' || this.props.snake.direction === 'w')) {
+                  } else if ((key === 's' || key === 'down')  && (this.props.snake.direction === 's' || this.props.snake.direction === 'w')) {
                     return
-                  } else if (key === 'a' && (this.props.snake.direction === 'a' || this.props.snake.direction === 'd')) {
+                  } else if ((key === 'a' || key === 'left')  && (this.props.snake.direction === 'a' || this.props.snake.direction === 'd')) {
                     return
-                  } else if (key === 'd' && (this.props.snake.direction === 'd' || this.props.snake.direction === 'a')) {
+                  } else if ((key === 'd' || key === 'right')  && (this.props.snake.direction === 'd' || this.props.snake.direction === 'a')) {
                     return
                   }
+
                   if (this.props.snake.alive === false && this.props.snake.running === false){
                     this.props.endGame();
                   }

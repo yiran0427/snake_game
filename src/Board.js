@@ -1,6 +1,9 @@
 import React from 'react';
 import Snake from './Snake';
+import Panel from './Panel';
+import './Panel.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
+import { isAbsolute } from 'path';
 
 const boardSize = 720;
 const cellSize = boardSize / 30;
@@ -8,7 +11,6 @@ const cellSize = boardSize / 30;
 class Board extends React.Component{
     constructor(props){
         super(props);
-
         this.state = {
           snake: {
             head: {
@@ -22,19 +24,18 @@ class Board extends React.Component{
             direction: '',
             body: [{x:15,y:15}],
             score: 0, 
+            record: 0,
             running: false,
             alive: true,
             speed: 1,
             food:{}
-          },
-          display: '0'
+          }
       }
     }
 
     drawGrid() {
         const {ctx} = this.state;
-      
-        ctx.strokeStyle = 'grey'; // strokestyle is a field of ctx, filling shapes' outline
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // strokestyle is a field of ctx, filling shapes' outline
         
         // create and set gradient
         // var gradient = ctx.createLinearGradient(0, 0, boardSize, 0);
@@ -62,6 +63,24 @@ class Board extends React.Component{
         //   ctx.stroke();
         // }
       }
+
+      // drawGrid2() {
+      //   const {ctx} = this.state;
+      //   ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)'; // strokeStyle is a field, no ()
+      //   ctx.fillStyle = '#cee5b3';
+      //   for (var vertical = cellSize; vertical < boardSize; vertical += cellSize){
+      //     ctx.beginPath();
+      //     ctx.moveTo(vertical, 0);
+      //     ctx.lineTo(vertical, boardSize);
+      //     ctx.stroke();
+      //   }
+      //   for (var horizontal = cellSize; horizontal < boardSize; horizontal += cellSize){
+      //     ctx.beginPath();
+      //     ctx.moveTo(0, horizontal);
+      //     ctx.lineTo(boardSize, horizontal);
+      //     ctx.stroke();
+      //   }
+      // }
 
       drawSnake(){
         const {ctx, snake} = this.state
@@ -102,14 +121,17 @@ class Board extends React.Component{
         this.drawRect(position.x, position.y,1,1);
       }
 
-      exists(point) {
+      exists(position) {
         const {snake} = this.state;
-      
-        for (var cord in snake.body) {
-          if (point.x === cord.x && point.y === cord.y) {
-            return true
+        for(var i = 0; i < snake.score; i++){
+          var cord = {
+            x: snake.body[i].x,
+            y: snake.body[i].y
           }
+          if (position.x === cord.x && position.y === cord.y) {
+            return true;
         }
+      }
         return false
       }
 
@@ -120,7 +142,15 @@ class Board extends React.Component{
       
       changeDirection (direction) {
         let newState = Object.assign({}, this.state);
-        newState.snake.direction = direction;
+        if(direction === 'w' || direction === 'up'){
+          newState.snake.direction = 'w';
+        } else if(direction === 's' || direction === 'down'){
+          newState.snake.direction = 's';
+        } else if(direction === 'a' || direction === 'left'){
+          newState.snake.direction = 'a';
+        } else if(direction === 'd' || direction === 'right'){
+          newState.snake.direction = 'd';
+        }
         this.setState(newState);
         this.canvasMoveSnake();
       }
@@ -151,7 +181,6 @@ class Board extends React.Component{
       addScore(){
         let newState = Object.assign({}, this.state);
         newState.snake.score = newState.snake.score + 1;
-        newState.display = newState.snake.score;
         this.setState(newState);
       }
 
@@ -171,6 +200,7 @@ class Board extends React.Component{
         if (snake.alive === false && snake.running === false){
           this.endGame();
         }
+        // this.drawGrid2();
       }
 
       drawRect(x, y, l, h) {
@@ -181,14 +211,14 @@ class Board extends React.Component{
 
       speedUp(){
         let newState = Object.assign({}, this.state);
-        newState.snake.speed = this.state.snake.speed + 1;        
+        newState.snake.speed = this.state.snake.speed + 0.5;        
         this.setState(newState);
     }
 
       speedDown(){
         let newState = Object.assign({}, this.state);
-        if(this.state.snake.speed >= 1){
-          newState.snake.speed = this.state.snake.speed - 1;
+        if(this.state.snake.speed > 1){
+          newState.snake.speed = this.state.snake.speed - 0.5;
         } else {
           newState.snake.speed = this.state.snake.speed;
           alert("You have reached the minimum speed.")
@@ -197,6 +227,8 @@ class Board extends React.Component{
     } 
 
     resetBoard(){
+      const {snake} = this.state;
+      const temp = snake.score > snake.record? snake.score:snake.record;
       this.setState({
         snake: {
           head: {
@@ -209,6 +241,8 @@ class Board extends React.Component{
           },
           direction: '',
           body: [{x:15,y:15}],
+          score: 0, 
+          record: temp,
           running: false,
           alive: true,
           speed: 1,
@@ -273,12 +307,16 @@ class Board extends React.Component{
 
 
     render(){
+      const style={
+        position: 'absolute',
+        left: '150px',
+        top: '60px'
+      }
         return (
             <div id = 'gameContainer' className = 'container-fluid' >
-              {this.state.display}
-                <canvas id='gameBoard' ref="gameBoard" width={boardSize} height={boardSize} />
+                <canvas id = 'gameBoard' ref = 'gameBoard' width={boardSize} height={boardSize} style={style}/>
                 <KeyboardEventHandler
-                  handleKeys={['r', 'esc', '[', ']']}
+                  handleKeys={['r', 'esc', '[', ']', 'space']}
                   onKeyEvent={(key, e) => {
                   if(key === 'r'){
                     this.resetBoard();
@@ -288,12 +326,20 @@ class Board extends React.Component{
                     this.speedUp();
                   } else if(key === '['){
                     this.speedDown();
+                  } else if(key === 'space'){
+                    alert("Pause for a sec :)");
                   }
                 }} />
                 <Snake snake={this.state.snake}
                 changeDirection={this.changeDirection.bind(this)}
                 endGame={this.endGame.bind(this)}
-           />
+                />
+                <Panel  className = 'Panel'
+                snake={this.state.snake}
+                speedUp={this.speedUp.bind(this)}
+                speedDown={this.speedDown.bind(this)}
+                resetBoard={this.resetBoard.bind(this)}
+                />
             </div> // need to return the whole div    
         )
     }
