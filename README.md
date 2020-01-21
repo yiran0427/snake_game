@@ -1,6 +1,6 @@
 # Snake Game
 A classic snake game built in React and deploied on Firebase.
 
-![](name-of-giphy.gif)
+![](snake.gif)
 
 Click here to launch the game https://snake-0710.firebaseapp.com/
